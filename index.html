@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Karteikarten – Wartung & Instandhaltung (Kap. 1–3)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f4ef; --paper:#fffdf8; --ink:#1f2328; --muted:#6b6f76; --line:#e4e0d6;
+  --t1:#0f766e; --t1s:#e3f2ef; --t2:#b45309; --t2s:#fbefe0; --t3:#4338ca; --t3s:#e9e8fb;
+  --ok:#15803d; --no:#b91c1c; --radius:16px;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#16181c; --paper:#1f2227; --ink:#ebe8e1; --muted:#9aa0a8; --line:#33373e;
+    --t1:#5eead4; --t1s:#123733; --t2:#fbbf24; --t2s:#3a2a10; --t3:#a5b4fc; --t3s:#25264a; --ok:#4ade80; --no:#f87171; }
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,sans-serif;font-size:16px;line-height:1.5}
+.wrap{max-width:860px;margin:0 auto;padding:24px 18px 60px}
+header h1{font-family:"Source Serif 4",Georgia,serif;font-weight:600;font-size:1.7rem;margin:0 0 2px;letter-spacing:-.01em}
+header p{margin:0;color:var(--muted);font-size:.92rem}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:18px 0 10px}
+.chip{border:1px solid var(--line);background:var(--paper);color:var(--ink);padding:7px 13px;border-radius:999px;font:500 .88rem Inter,sans-serif;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.chip.t1[aria-pressed="true"]{background:var(--t1);border-color:var(--t1);color:#fff}
+.chip.t2[aria-pressed="true"]{background:var(--t2);border-color:var(--t2);color:#fff}
+.chip.t3[aria-pressed="true"]{background:var(--t3);border-color:var(--t3);color:#fff}
+@media (prefers-color-scheme: dark){ .chip.t1[aria-pressed="true"],.chip.t2[aria-pressed="true"],.chip.t3[aria-pressed="true"]{color:#111} }
+.spacer{flex:1}
+.tabs{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:var(--paper)}
+.tabs button{border:0;background:none;padding:7px 14px;font:500 .88rem Inter,sans-serif;color:var(--muted);cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--ink);color:var(--paper)}
+.progress{display:flex;align-items:center;gap:12px;font-size:.85rem;color:var(--muted);margin:6px 0 14px}
+.track{flex:1;height:6px;background:var(--line);border-radius:6px;overflow:hidden}
+.fill{height:100%;background:var(--ok);width:0;transition:width .3s}
+.stage{perspective:1600px}
+.card{position:relative;min-height:360px;cursor:pointer;transform-style:preserve-3d;transition:transform .45s cubic-bezier(.2,.7,.2,1)}
+.card.flipped{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:26px 28px 22px;display:flex;flex-direction:column;box-shadow:0 1px 0 rgba(0,0,0,.03),0 10px 30px -18px rgba(0,0,0,.25);overflow:auto}
+.back{transform:rotateY(180deg)}
+.meta{display:flex;justify-content:space-between;align-items:center;font-size:.78rem;color:var(--muted);margin-bottom:14px;gap:8px}
+.tag{font-weight:600;padding:3px 9px;border-radius:999px;font-size:.74rem}
+.tag.t1{background:var(--t1s);color:var(--t1)} .tag.t2{background:var(--t2s);color:var(--t2)} .tag.t3{background:var(--t3s);color:var(--t3)}
+.q{font-family:"Source Serif 4",Georgia,serif;font-size:1.5rem;font-weight:600;line-height:1.3;margin:auto 0;text-align:center;padding:10px 0}
+.hint{text-align:center;font-size:.8rem;color:var(--muted);margin-top:auto}
+.qsmall{font-size:.9rem;color:var(--muted);margin:0 0 10px;font-weight:500}
+.a{font-size:1rem}
+.a ul,.a ol{margin:.3em 0 .3em 1.2em;padding:0} .a li{margin:.18em 0}
+.a p{margin:.4em 0}
+.a table{border-collapse:collapse;width:100%;font-size:.9rem;margin:.4em 0}
+.a th,.a td{border:1px solid var(--line);padding:5px 8px;text-align:left;vertical-align:top}
+.a th{background:var(--bg)}
+.f{font-family:"Source Serif 4",Georgia,serif;font-style:italic;font-size:1.12rem;background:var(--bg);border-radius:8px;padding:6px 12px;display:inline-block;margin:.2em 0}
+.merk{border-left:3px solid var(--t2);padding:4px 10px;margin:.6em 0 0;font-size:.92rem;background:var(--t2s);border-radius:0 8px 8px 0}
+.controls{display:flex;gap:10px;justify-content:center;margin-top:16px;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:var(--paper);color:var(--ink);padding:11px 18px;border-radius:12px;font:600 .95rem Inter,sans-serif;cursor:pointer;min-width:130px}
+.btn.no{border-color:color-mix(in srgb,var(--no) 40%,var(--line));color:var(--no)}
+.btn.ok{border-color:color-mix(in srgb,var(--ok) 40%,var(--line));color:var(--ok)}
+.btn:hover{filter:brightness(.97)}
+.sub{display:flex;gap:14px;justify-content:center;margin-top:12px;font-size:.84rem;flex-wrap:wrap}
+.link{background:none;border:0;color:var(--muted);text-decoration:underline;cursor:pointer;font:inherit}
+label.opt{color:var(--muted);display:inline-flex;gap:6px;align-items:center;cursor:pointer}
+.keys{text-align:center;color:var(--muted);font-size:.76rem;margin-top:14px}
+kbd{border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:0 5px;font-size:.72rem;background:var(--paper)}
+.done{text-align:center;padding:50px 20px;background:var(--paper);border:1px solid var(--line);border-radius:var(--radius)}
+.done h2{font-family:"Source Serif 4",serif;margin:0 0 6px}
+/* Liste */
+.search{width:100%;padding:11px 14px;border-radius:12px;border:1px solid var(--line);background:var(--paper);color:var(--ink);font:inherit;margin-bottom:14px}
+.sec{font-family:"Source Serif 4",serif;font-size:1.2rem;margin:26px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--line)}
+.item{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:10px}
+.item .iq{font-weight:600;margin-bottom:6px}
+.item .num{color:var(--muted);font-weight:500;margin-right:6px;font-size:.85rem}
+.item.known{opacity:.75}
+.item .st{float:right;font-size:.75rem;color:var(--ok)}
+.savebox{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-top:14px;font-size:.9rem}
+.savebox textarea{width:100%;font:500 .95rem ui-monospace,Menlo,monospace;padding:10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);resize:vertical;word-break:break-all}
+.setup{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:4px 0 4px}
+.setup .lbl{font-size:.85rem;color:var(--muted)}
+.kind{font-size:.72rem;font-weight:600;padding:2px 8px;border-radius:999px;margin-left:4px;border:1px solid currentColor}
+.k-new{color:var(--t3)} .k-learn{color:var(--no)} .k-rev{color:var(--ok)}
+.how{margin-top:18px;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:10px 16px;font-size:.88rem}
+.how summary{cursor:pointer;font-weight:600}
+.how ul{margin:8px 0 4px 1.1em;padding:0} .how li{margin:.25em 0}
+[hidden]{display:none!important}
+@media (max-width:560px){ .q{font-size:1.25rem} .face{padding:20px 18px} .card{min-height:420px} .btn{min-width:0;flex:1} }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>Karteikarten · Wartung &amp; Instandhaltung</h1>
+  <p>Kapitel 1 Grundlagen · 2 Schadensverhalten &amp; Zuverlässigkeit · 3 Instandhaltungsstrategien — nach den Vorlesungsfolien (HAW Hamburg, Müller/Schelberg)</p>
+</header>
+
+<div class="bar">
+  <button class="chip" data-topic="all" aria-pressed="true">Alle</button>
+  <button class="chip t1" data-topic="1" aria-pressed="false">1 · Grundlagen</button>
+  <button class="chip t2" data-topic="2" aria-pressed="false">2 · Schaden &amp; Zuverlässigkeit</button>
+  <button class="chip t3" data-topic="3" aria-pressed="false">3 · Strategien</button>
+  <span class="spacer"></span>
+  <div class="tabs" role="tablist">
+    <button role="tab" id="tabLearn" aria-selected="true">Lernen</button>
+    <button role="tab" id="tabList" aria-selected="false">Alle Karten</button>
+  </div>
+</div>
+
+<section id="learn">
+  <div class="setup">
+    <span class="lbl">Karten pro Lernstapel:</span>
+    <div class="tabs" id="sizes">
+      <button data-size="10">10</button><button data-size="20">20</button><button data-size="30">30</button><button data-size="all">Alle</button>
+    </div>
+  </div>
+  <div class="progress"><span id="count"></span><div class="track"><div class="fill" id="fill"></div></div><span id="known"></span></div>
+  <div class="stage" id="stage">
+    <div class="card" id="card" tabindex="0" aria-live="polite">
+      <div class="face front"><div class="meta"><span><span class="tag" id="tagF"></span> <span class="kind" id="kindF"></span></span><span id="numF"></span></div><div class="q" id="q"></div><div class="hint">Antippen oder Leertaste zum Umdrehen</div></div>
+      <div class="face back"><div class="meta"><span><span class="tag" id="tagB"></span> <span class="kind" id="kindB"></span></span><span id="numB"></span></div><div class="qsmall" id="q2"></div><div class="a" id="a"></div></div>
+    </div>
+  </div>
+  <div class="done" id="done" hidden>
+    <h2 id="doneTitle">Alles gelernt 🎉</h2>
+    <p id="doneTxt"></p>
+    <div class="controls"><button class="btn ok" id="bReviewOnly">Weiter wiederholen</button></div>
+  </div>
+  <div class="controls" id="ctrl">
+    <button class="btn no" id="bNo">✗ Nochmal</button>
+    <button class="btn ok" id="bOk">✓ Gewusst</button>
+  </div>
+  <div class="sub">
+    <button class="link" id="bSave">💾 Lernstand sichern / laden</button>
+    <button class="link" id="bReset">Fortschritt zurücksetzen</button>
+  </div>
+  <div class="savebox" id="savebox" hidden>
+    <p style="margin:0 0 8px"><b>Dein Lernstand-Code</b>: kopieren und z. B. in deinen Notizen oder als Nachricht an dich selbst speichern. Später hier einfügen und auf „Code laden“ tippen, auch auf einem anderen Gerät.</p>
+    <textarea id="code" rows="3" spellcheck="false"></textarea>
+    <div class="controls" style="margin-top:10px">
+      <button class="btn" id="bCopy">Code kopieren</button>
+      <button class="btn ok" id="bLoad">Code laden</button>
+    </div>
+    <p id="saveMsg" style="text-align:center;margin:8px 0 0;font-size:.85rem;color:var(--muted)"></p>
+  </div>
+  <div class="keys"><kbd>Leertaste</kbd> umdrehen · <kbd>→</kbd> gewusst · <kbd>←</kbd> nochmal</div>
+  <details class="how">
+    <summary>So funktioniert der Lernstapel</summary>
+    <ul>
+      <li>Du lernst immer nur so viele Karten gleichzeitig, wie oben eingestellt (z. B. 10).</li>
+      <li>Eine Karte verlässt den Stapel erst, wenn du sie <b>gewusst</b> hast. Erst dann rückt eine <b>neue</b> Karte nach.</li>
+      <li>Hast du eine Karte einmal falsch gehabt, musst du sie <b>zweimal hintereinander</b> wissen.</li>
+      <li>Etwa jede 4. bis 5. Karte ist eine <b>Wiederholung</b> einer Karte, die du schon kannst. Weißt du sie nicht mehr, kommt sie zurück in den Stapel.</li>
+      <li>Je öfter du eine Karte bei Wiederholungen weißt, desto höher ihre Stufe (1–5) und desto seltener kommt sie dran.</li>
+    </ul>
+  </details>
+</section>
+
+<section id="list" hidden>
+  <input class="search" id="search" placeholder="Karten durchsuchen, z. B. „Badewanne“, „RCM“, „Wartung“ …">
+  <div id="items"></div>
+</section>
+</div>
+
+<script>
+const T = {1:"Grundlagen",2:"Schaden & Zuverlässigkeit",3:"Strategien"};
+const C = [
+/* ================= 1 GRUNDLAGEN ================= */
+[1,"Wie definiert DIN 31051 den Begriff „Instandhaltung“?",
+`<p>Kombination aller <b>technischen</b>, <b>administrativen</b> und <b>Managementmaßnahmen</b> während des <b>Lebenszyklus</b> eines Objekts, die dem <b>Erhalt</b> oder der <b>Wiederherstellung</b> seines funktionsfähigen Zustands dienen, sodass es die <b>geforderte Funktion</b> erfüllen kann.</p>`],
+[1,"Welche vier Grundmaßnahmen der Instandhaltung gibt es nach DIN 31051?",
+`<ol><li><b>Inspektion</b>: Ist-Zustand feststellen und beurteilen</li><li><b>Wartung</b>: Soll-Zustand bewahren</li><li><b>Instandsetzung</b>: Soll-Zustand wiederherstellen</li><li><b>Verbesserung</b>: Zuverlässigkeit, Instandhaltbarkeit oder Sicherheit steigern, ohne die Funktion zu ändern</li></ol>`],
+[1,"Was versteht man unter den „TOP-Maßnahmen“ der Instandhaltung?",
+`<p>Die drei Ebenen, auf denen Instandhaltung wirkt: <b>T</b>echnisch, <b>O</b>rganisatorisch, <b>P</b>ersonell.</p><p>Planung, Organisation und administrative/operative Durchführung finden in allen vier Grundmaßnahmen gleichermaßen statt.</p>`],
+[1,"Was ist eine Inspektion und was gehört <i>nicht</i> dazu?",
+`<ul><li>Prüfung auf <b>Konformität</b> der maßgeblichen Merkmale eines Objekts durch <b>Messung, Beobachtung oder Funktionsprüfung</b></li><li>Ist-Zustand feststellen und beurteilen, Abnutzungsursachen bestimmen, notwendige Maßnahmen ableiten</li><li>Vorbeugende Instandhaltung, Durchführung nach Arbeitsanweisung</li></ul><p class="merk"><b>Keine Mängelbeseitigung!</b> Die Inspektion veranlasst nur weitere Maßnahmen, z. B. eine Wartung.</p>`],
+[1,"Typische Tätigkeiten der Inspektion?",
+`<p>Kontrollieren, Messen, Prüfen, Zählen, Justieren, Dokumentieren, Analysieren, Diagnostizieren, Planen</p><p>Beispiele: Sichtkontrolle, Nachmessen, Rauheitsprüfung, Schwingungsprüfung</p>`],
+[1,"Welche Wirkung hat die Inspektion auf den Abbau des Abnutzungsvorrats?",
+`<p><b>Keinen Einfluss</b> auf den tatsächlichen Abbau.</p><p class="merk">Inspektion = <b>schädigungsbeobachtende</b> Maßnahme.</p>`],
+[1,"Was ist Wartung? Nenne typische Tätigkeiten.",
+`<p>Maßnahmen zur <b>Verzögerung des Abbaus</b> des vorhandenen Abnutzungsvorrats (Bewahrung des Soll-Zustands). Ziel: weniger Verschleiß, längere Lebensdauer.</p><p>Tätigkeiten: <b>Reinigen, Schmieren/Ölen, Nachstellen, Nachfüllen, Konservieren, Ergänzen</b>, Austausch kleiner Verschleißteile (z. B. Filter, „kleine Instandsetzung“)</p>`],
+[1,"Welche Wirkung hat die Wartung auf den Abbau?",
+`<p>Wartung <b>verzögert</b> den Abbau: Die Abbaukurve verläuft flacher, die Abnutzungsgrenze wird später erreicht.</p><p class="merk">Wartung = <b>schädigungshemmende</b> Maßnahme.</p>`],
+[1,"Warum ist ein Wartungsplan rechtlich wichtig?",
+`<p>Wartungsmaßnahmen sind <b>Grundlage der Gewährleistung</b>. Werden vorgegebene Wartungen nicht durchgeführt, <b>verfällt die Gewährleistung</b>.</p><p>Außerdem: lückenlose Dokumentation (gesetzliche Aufbewahrungspflicht), Teil des QM-Systems, Betriebs-, Umwelt- und Arbeitssicherheit.</p>`],
+[1,"Welche Inhalte und Einflussgrößen hat ein Wartungsplan?",
+`<ul><li><b>Bedeutung:</b> Arbeitsanweisung und Grundlage für den Wartungsauftrag; Liste aller zu wartenden Einheiten mit Intervallen</li><li><b>Intervalle:</b> Betriebsstunden, Dauer, Umdrehungen, gefahrene Kilometer usw.</li><li><b>Einflussgrößen:</b> Bauart/Modell, Nutzung, Abnutzung, Erfahrung mit erkannten Schwächen, Störungswahrscheinlichkeiten</li></ul>`],
+[1,"Welche Ziele, Intervalle und Einflussgrößen hat ein Inspektionsplan?",
+`<ul><li><b>Ziele:</b> ordnungsgemäßen Ist-Zustand ermitteln, Betriebs-, Umwelt- und Arbeitssicherheit gewährleisten, Haftung/Aufbewahrungspflicht</li><li><b>Intervalle:</b> Betriebsstunden, Dauer, Umdrehungen, km</li><li><b>Merkmale:</b> z. B. Rundheit, Ebenheit, Mindestblechdicke, Festsitz, Korrosion, Füllstand</li><li><b>Einflussgrößen:</b> Nutzungsverhalten, Gesetze, Verträge, Herstellervorschriften, Erfahrung</li></ul>`],
+[1,"Wie läuft die Inspektions- bzw. Wartungsprozesskette ab?",
+`<ol><li><b>Auftrag</b>: dokumentieren und analysieren</li><li><b>Plan erstellen</b>: Ort, Termin, Methoden, Gerät, Maßnahmen, Merkmalswerte</li><li><b>Vorbereitung</b>: Arbeitsausrüstung, Schutz- und Sicherheitseinrichtungen</li><li><b>Durchführung</b>: Ist-Zustand ermitteln bzw. nachstellen, schmieren, reinigen, nachfüllen</li><li><b>Funktionsprüfung</b>: beurteilen, Freigabe oder Fehleranalyse</li><li><b>Rückmeldung</b>: weitere Maßnahmen abstimmen, Dokumentation</li></ol>`],
+[1,"Was ist Instandsetzung und welche zwei Arten gibt es?",
+`<p>Physische Maßnahme, um die <b>Funktion eines fehlerhaften Objekts wiederherzustellen</b> (Rückführung in den Soll-Zustand); korrektiv oder präventiv.</p><table><tr><th>Austausch</th><th>Reparatur</th></tr><tr><td>Sensoren, Wälzlager, Dichtungen, Riemen, Filter, Pumpen</td><td>Nacharbeiten, Drehen, Auftragschweißen, Neubeschichtung</td></tr></table><p>Auslöser: Intervall, Zustand, Schaden oder Ausfall</p>`],
+[1,"Welche Wirkung hat die Instandsetzung auf den Abbau?",
+`<p>Sie <b>behebt</b> den entstandenen Abbau, d. h. der Abnutzungsvorrat wird wieder aufgefüllt (bis max. 100 %).</p><p class="merk">Instandsetzung = <b>schädigungsbeseitigende</b> Maßnahme.</p>`],
+[1,"Was ist Verbesserung (DIN 31051)?",
+`<p>Kombination aller technischen und administrativen Maßnahmen sowie Managementmaßnahmen zur <b>Steigerung der Zuverlässigkeit und/oder Instandhaltbarkeit und/oder Sicherheit</b> eines Objekts, <b>ohne seine ursprüngliche Funktion zu ändern</b>.</p><ul><li>„perfektive“ Instandhaltung</li><li>Grundlage: Schwachstellenanalysen</li><li>Wirkung: <b>erhöht den Abnutzungsvorrat</b> über das Ausgangsniveau</li></ul>`],
+[1,"Welche Arten von Verbesserungsmaßnahmen gibt es? (mit Beispielen)",
+`<ul><li><b>Werkstoffänderung</b>, z. B. Aufpanzerung von Funktionsflächen (Baggerschaufel)</li><li><b>Konstruktionsänderung</b>, z. B. Behälter mit Dopplung</li><li><b>Systemänderung</b>, z. B. Glühbirne durch Energiesparlampe ersetzen, moderne Batterietechnik</li><li><b>Herstellerwechsel</b></li></ul>`],
+[1,"Zahnarzt-Analogie: Ordne Diagnose, Prophylaxe, Therapie und Implantat den Grundmaßnahmen zu.",
+`<table><tr><th>Zahnarzt</th><th>Grundmaßnahme</th><th>Art</th><th>Wirkung</th></tr>
+<tr><td>Diagnose</td><td>Inspektion</td><td>präventiv</td><td>beobachtend</td></tr>
+<tr><td>Prophylaxe</td><td>Wartung</td><td>präventiv</td><td>hemmend</td></tr>
+<tr><td>Therapie</td><td>Instandsetzung</td><td>korrektiv</td><td>beseitigend</td></tr>
+<tr><td>Implantat</td><td>Verbesserung</td><td>perfektiv</td><td>verbessernd</td></tr></table>`],
+[1,"Was ist der Abnutzungsvorrat?",
+`<p>Die <b>Reserve der möglichen Funktionserfüllung</b> unter festgelegten Bedingungen, die einem Objekt aufgrund von <b>Herstellung, Instandsetzung oder Verbesserung</b> innewohnt.</p><p>Bild: das „halbvolle Glas“. Bei Inbetriebnahme 100 %, beim Ausfall 0 %.</p>`],
+[1,"Was ist die Abnutzungsgrenze?",
+`<p>Der <b>vereinbarte oder festgelegte Mindestwert</b> des Abnutzungsvorrats. Wird sie unterschritten, ist die Funktion unzulässig beeinträchtigt.</p>`],
+[1,"Was zeigt die Abbaukurve und welche Eigenschaften hat sie?",
+`<ul><li>Stellt den <b>technischen Zustand</b> (Abnutzungsvorrat) der Betrachtungseinheit über die Zeit dar</li><li>Sinkt <b>nicht linear</b></li><li>Ihr Verlauf ist durch Instandhaltung <b>beeinflussbar</b></li></ul><p>Inspektion: kein Einfluss · Wartung: flacher · Instandsetzung: zurück auf Soll · Verbesserung: über das Ausgangsniveau</p>`],
+[1,"Planmäßige vs. außerplanmäßige Instandhaltung: Beispiele?",
+`<table><tr><th>Inspektion</th><th>Wartung</th><th>geplante Instandsetzung</th><th>Verbesserung</th><th>ungeplant</th></tr>
+<tr><td>Sichtkontrolle, Nachmessen, Rauheits-/Schwingungsprüfung</td><td>Betriebsstoffe ersetzen, Filter tauschen</td><td>Reparaturschweißen, Auftragschweißen/Drehen, Richten</td><td>Energiesparlampe, Aufpanzerung, neue Batterietechnik</td><td>Schadensbehebung, Ausfallreparatur</td></tr></table>`],
+[1,"Beschreibe den Instandhaltungsregelkreis.",
+`<ol><li><b>Bedarfe:</b> unplanmäßige Störungen, planmäßige I/W/I, Projekte</li><li><b>Planung:</b> Kapazität, Material, Kosten, Zeiten</li><li><b>Durchführung:</b> eigen/fremd, Steuerung, Rückmeldung</li><li><b>Auswertung:</b> Kosten, Verfügbarkeit, Lebensläufe, Schwachstellenanalyse</li><li><b>Maßnahmen:</b> Qualität verbessern, Strategie ändern, Neukauf oder Instandsetzung, technische Änderungen</li></ol><p>Basis: <b>Stammdaten</b> (Anlagenstruktur, Arbeitspläne, Stücklisten, Schadenskataloge)</p>`],
+[1,"Warum steigt die Bedeutung der Instandhaltung? (intern/extern)",
+`<ul><li><b>Interne Ursachen:</b> kapitalintensive, komplexe Anlagen; technische und organisatorische Verkettung; Automatisierung; hoher Nutzungsgrad</li><li><b>Externe Ursachen:</b> verschärfte Umweltschutzvorschriften, verschärfte Arbeitsvorschriften</li></ul><p>Weitere Einflüsse: Wettbewerbsdruck, Energiereserven, Anlagentechnologie, steigende IH-Kosten, TPM</p>`],
+[1,"Was beschreibt die „Taylorwanne“?",
+`<ul><li><b>Manufaktur:</b> hohe Transportkosten, lokale Konkurrenz, Kreativität als Wettbewerbsfaktor; flexibel, kundenorientiert, innovativ</li><li><b>Taylorismus:</b> sinkende Transportkosten, Massenmärkte; Wertschöpfung durch Wissenschaft/Effizienz, Kreativität nach innen gelenkt</li><li><b>Post-Taylorismus:</b> Märkte stoßen an globale Grenzen, Dynamik steigt wieder; Flexibilität &amp; Kostenorientierung</li></ul>`],
+[1,"Welche vier Ziele/Anforderungen hat die Instandhaltung (Leidinger)?",
+`<ul><li><b>Zuverlässigkeit</b>: Fertigungsqualität und Funktion erhalten</li><li><b>Sicherheit</b>: Schutz von Personen, Sachen, Umwelt</li><li><b>Verfügbarkeit</b>: Betriebsbereitschaft erhalten</li><li><b>Werterhalt</b>: hohe Restlebenserwartung</li></ul><p>Anforderungen: Kostendruck, steigende Verfügbarkeitsanforderung, Änderungsfähigkeit, Komplexität, Personalqualifikation</p>`],
+[1,"Wie ist das Zielsystem der Instandhaltung aufgebaut?",
+`<table><tr><th colspan="2">Innere Ziele</th><th colspan="2">Externe Ziele</th></tr>
+<tr><td><b>Sachziele</b> (Leistung): Tätigkeitsziele von I, W, I, V</td><td><b>Wertziele</b> (monetär): Kosten, Qualität, Zeit</td><td><b>Sozialziele</b>: Nachhaltigkeit, Umweltschutz, Arbeitssicherheit</td><td><b>Kundenorientierte Ziele</b>: Flexibilität, Agilität, Kundenzufriedenheit</td></tr></table>`],
+[1,"Direkte vs. indirekte Instandhaltungskosten?",
+`<table><tr><th>Direkt</th><th>Indirekt</th></tr><tr><td>Personal, Material &amp; Ersatzteile, Hilfs- und Betriebsstoffe, Energie, Betriebsmittel, Overhead; Kosten für reaktive, präventive/prädiktive und perfektive Maßnahmen</td><td>Stillstandskosten (Potenzialleerkosten), entgangene Deckungsbeiträge, Ersatzbeschaffung, Überstunden, Nacharbeit, Unfallfolgekosten</td></tr></table><p class="merk">Indirekte Kosten sind oft <b>2- bis 3-mal so hoch</b> wie die direkten.</p>`],
+[1,"In welche Phasen gliedern sich die Anlagenlebenszykluskosten?",
+`<p><b>Planungsphase</b> → <b>Nutzungsphase</b> (hier fallen die IH-Kosten an) → <b>Ausscheidungsphase</b> (Rückbau)</p><p>Ziel: Lebenszykluskosten insgesamt senken, nicht nur die Anschaffungskosten (Life Cycle Costing).</p>`],
+[1,"Beschreibe den Teufelskreis vernachlässigter Wartung (Ziel Qualität).",
+`<p>Wartung wird vernachlässigt → Anlagenzustand verschlechtert sich → Soll-Bandbreite wird nicht eingehalten → Prozessqualität sinkt → Ausschuss und Nacharbeit steigen, Produktqualität sinkt → zusätzliche Fertigungskapazität nötig → <b>noch weniger Zeit für Wartung</b> → …</p>`],
+[1,"Wie wirkt sich vorbeugende vs. reaktive IH auf das Ziel „Zeit“ aus?",
+`<table><tr><th>Vorbeugend</th><th>Reaktiv</th></tr><tr><td>Geplanter Stillstand, geplante Durchlaufzeit, genaue Planbarkeit, Liefertreue erfüllt</td><td>Ungeplanter Ausfall, Verfügbarkeitsverluste, ungeplante Durchlaufzeitverlängerung, Lieferzeit überschritten</td></tr></table>`],
+[1,"Welche Unfallursachen dominieren bei Instandhaltungsarbeiten?",
+`<ul><li><b>36 %</b> Quetschung an laufenden Maschinen</li><li><b>33 %</b> Absturz von Arbeitsplätzen/Zugängen</li><li><b>18 %</b> Verbrennung/Vergiftung</li><li>9 % Prellungen/Quetschungen</li><li>4 % Sonstige</li></ul>`],
+[1,"Nachhaltigkeit: Definition, Managementregeln und Drei-Säulen-Modell?",
+`<p><b>Sustainable Development:</b> Entwicklung, die die Bedürfnisse der Gegenwart befriedigt, ohne zu riskieren, dass künftige Generationen ihre Bedürfnisse nicht befriedigen können.</p><ul><li>Erneuerbare Ressourcen nicht übernutzen</li><li>Nicht erneuerbare Ressourcen substituieren</li><li>Belastung der Ökosysteme begrenzen</li></ul><p><b>Drei Säulen:</b> ökonomisch, ökologisch, sozial (in der IH zusätzlich: technisch)</p>`],
+[1,"Welche Flexibilitätsarten sichert die Instandhaltung?",
+`<ul><li><b>Personelle</b> Flexibilität: Qualifikation und Weiterentwicklung der IH-Mitarbeiter</li><li><b>Dispositive</b> Flexibilität: IH-Maßnahmen mit Produktionsplanung abstimmen</li><li><b>Kapazitive</b> Flexibilität: Flexibilitätspotenzial der Anlagen bewahren (präventiv/prädiktiv), herstellen (reaktiv), erhöhen (perfektiv)</li></ul>`],
+[1,"Welche Faktoren bestimmen die Kundenzufriedenheit aus IH-Sicht?",
+`<ul><li>Pünktliche und zuverlässige Lieferungen</li><li>Voll funktionsfähige, verfügbare Maschinen</li><li>Prozess- und Produktqualität</li><li>Verfügbarkeit und optimierter IH-Aufwand über den Lebenszyklus</li></ul><p>IH als aktiver Geschäftsprozess im QMS → Richtlinie <b>VDI 2887</b></p>`],
+[1,"Präventive Instandhaltungsarten nach DIN EN 13306?",
+`<ul><li><b>Präventiv:</b> in festgelegten Abständen/nach Kriterien, um die Ausfallwahrscheinlichkeit zu senken</li><li><b>Vorausbestimmt:</b> feste Zeitabstände/Nutzungseinheiten, <b>ohne</b> vorherige Zustandsermittlung</li><li><b>Zustandsorientiert:</b> Zustandsüberwachung/Prüfungen + daraus abgeleitete Maßnahmen</li><li><b>Voraussagend:</b> basiert auf Vorhersage aus wiederholter Analyse/bekannten Abbau-Parametern</li><li><b>Geplant:</b> nach festgelegtem Zeitplan oder Zahl von Nutzungseinheiten</li></ul>`],
+[1,"Korrektive Instandhaltungsarten nach DIN EN 13306?",
+`<ul><li><b>Korrektiv:</b> nach Fehlererkennung, um die geforderte Funktion wiederherzustellen</li><li><b>Aufgeschoben korrektiv:</b> nicht sofort, sondern nach IH-Regeln zurückgestellt</li><li><b>Sofort korrektiv:</b> ohne Aufschub, um unannehmbare Folgen zu vermeiden</li></ul>`],
+[1,"Instandhaltungsarten nach Ort und Personal (DIN EN 13306)?",
+`<ul><li><b>Ferngesteuert:</b> ohne physischen Zugriff des Personals</li><li><b>Vor Ort:</b> dort, wo sich die Einheit normalerweise befindet</li><li><b>Während des Betriebs:</b> ohne die Funktion zu beeinflussen (Sicherheitsvorkehrungen!)</li><li><b>Bediener-Instandhaltung:</b> vom Bediener selbst ausgeführt</li></ul>`],
+[1,"Wichtige Normen I: DIN 31051, DIN EN 13306, DIN 31052, VDI 2893, VDI 2892?",
+`<table><tr><td><b>DIN 31051</b></td><td>Grundlagen der Instandhaltung (Grundmaßnahmen)</td></tr><tr><td><b>DIN EN 13306</b></td><td>Instandhaltung – Begriffe</td></tr><tr><td><b>DIN 31052</b></td><td>Inhalt und Aufbau von IH-Anleitungen</td></tr><tr><td><b>VDI 2893</b></td><td>Kennzahlen in der Instandhaltung</td></tr><tr><td><b>VDI 2892</b></td><td>Ersatzteilwesen</td></tr><tr><td><b>VDI 3423</b></td><td>Verfügbarkeit von Maschinen und Anlagen</td></tr></table>`],
+[1,"Wichtige Normen II: DIN 25424, VDI 3822, DIN EN 15628, DIN EN 13460, DIN EN 17007?",
+`<table><tr><td><b>DIN 25424</b></td><td>Fehlerbaumanalyse</td></tr><tr><td><b>VDI 3822</b></td><td>Schadensanalyse</td></tr><tr><td><b>DIN EN 15628</b></td><td>Qualifikation des IH-Personals</td></tr><tr><td><b>DIN EN 13460</b></td><td>Dokumente für die Instandhaltung</td></tr><tr><td><b>DIN EN 17007</b></td><td>Instandhaltungsprozesse</td></tr><tr><td><b>DIN EN 16991</b></td><td>Risikobasierte Inspektion</td></tr><tr><td><b>DIN EN 61078</b></td><td>Zuverlässigkeitsblockdiagramme</td></tr></table>`],
+
+/* ================= 2 SCHADENSVERHALTEN ================= */
+[2,"Welchen Einwirkungen unterliegen Anlagen und was folgt daraus?",
+`<p>Einwirkungen: <b>mechanisch, thermisch, (elektro-)chemisch</b></p><p>Folge: <b>irreversible mikrophysikalische Veränderungen</b> → Schädigung → der Abnutzungsvorrat sinkt durch die Wechselwirkung Beanspruchung ↔ Schädigung.</p><p class="merk">Instandhaltung = f(Abnutzung); Abnutzung = f(Zeit, Beanspruchung)</p>`],
+[2,"Normalbeanspruchung vs. Überbeanspruchung: welche Schädigungen entstehen?",
+`<table><tr><th>Normalbeanspruchung → kontinuierliche Schädigung</th><th>Überbeanspruchung/Gewaltnutzung → spontane Schädigung</th></tr><tr><td>Verschleiß, Ermüdung, Alterung, Korrosion, Verschmutzung</td><td>Riss/Bruch, Verformung, Verbrennung, Explosion</td></tr></table>`],
+[2,"Welche drei Phasen hat die Verschleiß-Zeit-Kurve?",
+`<ol><li><b>Einlaufverschleiß</b>: degressiv (anfangs hoch, dann abnehmend)</li><li><b>Linearer Verschleiß</b>: stationär, konstante Verschleißrate</li><li><b>Progressiver Verschleiß</b>: beschleunigt bis zum Schaden/Ausfall</li></ol><p>Der Verschleißbetrag steigt, bis die Abnutzungsgrenze erreicht ist (Ende der Lebensdauer).</p>`],
+[2,"Welche vier Verschleißmechanismen gibt es?",
+`<ul><li><b>Adhäsion</b>: Haften/„Kaltverschweißen“ der Kontaktpartner</li><li><b>Abrasion</b>: Furchung durch harte Partikel/Rauheitsspitzen</li><li><b>Oberflächenzerrüttung</b>: Rissbildung durch wechselnde Belastung</li><li><b>Tribochemische Reaktion</b>: chemische Reaktion mit Zwischenstoff/Umgebung</li></ul>`],
+[2,"Was ist Ermüdung?",
+`<ul><li>Schädigung durch <b>zyklische Wechselbeanspruchung</b></li><li>Die <b>dynamische Beanspruchbarkeit ist geringer als die statische</b>, deshalb versagen Bauteile unterhalb der statischen Festigkeit</li><li>Beispiel: Entgleisungen durch gebrochene Radsatzwellen, obwohl die statische Rechnung „ok“ war</li></ul><p class="merk">Mehr als <b>ein Drittel</b> aller bekannten Werkstoffschäden gehen auf Materialermüdung zurück.</p>`],
+[2,"Was zeigt die Wöhlerkurve? Welche Bereiche gibt es?",
+`<p>Gibt an, nach welcher <b>Lastspielzahl N</b> (log. Achse) eine Probe bei gegebener <b>Spannungsamplitude</b> voraussichtlich bricht.</p><ul><li><b>K</b>: Kurzzeitfestigkeit</li><li><b>Z</b>: Zeitfestigkeit</li><li><b>D</b>: Dauerfestigkeit (darunter kein Bruch)</li></ul><p>Gilt nur für <b>eine bestimmte Mittelspannung</b>.</p>`],
+[2,"Wie unterscheidet man Dauerbruch und Gewaltbruch am Bruchbild?",
+`<ul><li><b>Dauerbruch</b> (Ermüdung): <b>feinkörnig, samtartig</b>, oft mit Rastlinien</li><li><b>Gewaltbruch</b> (Überlast): <b>grobkörnig, zerklüftet</b></li></ul>`],
+[2,"ICE-Unglück Eschede 1998: Was lief aus Instandhaltungssicht schief?",
+`<ul><li>Zulässige Unrundheit der ICE-Räder: <b>max. 0,6 mm</b></li><li>Bei der Inspektion festgestellt: <b>0,8–1,1 mm</b></li><li><b>Es wurden keine weiteren IH-Maßnahmen eingeleitet</b></li></ul><p class="merk">Der Fehler wurde erkannt, aber nicht behoben: Inspektion ohne Konsequenz.</p>`],
+[2,"Was ist Alterung?",
+`<ul><li><b>Zeitabhängige, irreversible Veränderung</b> funktionsbezogener Eigenschaften durch <b>Gebrauch und/oder Lagerung</b></li><li>Gefügeveränderung unter Energieaufnahme → bleibende Festigkeits- und Formänderungen</li><li>Findet <b>immer</b> statt und betrifft alle Bereiche → strukturiertes <b>Alterungsmanagement</b> nötig</li><li>Beherrschbar, aber große Herausforderung (Sicherheitsrelevanz!)</li></ul>`],
+[2,"Welche Alterungsmechanismen gibt es?",
+`<ul><li>Zeitstandverhalten</li><li>Extraktion/Diffusion von Legierungsbestandteilen</li><li>Versprödung durch Strahlung</li><li>Kriechen/Relaxation</li></ul>`],
+[2,"Unterschied Kriechen vs. Relaxation?",
+`<ul><li><b>Kriechen:</b> Verformung steigt über die Zeit bei <b>konstanter Spannung</b></li><li><b>Relaxation:</b> Spannung fällt über die Zeit bei <b>konstanter Dehnung</b></li></ul>`],
+[2,"Alterung von Lithium-Ionen-Batterien: Was passiert?",
+`<ul><li>Alle wiederaufladbaren Batterien sind <b>Verschleißkomponenten</b></li><li>Leistung sinkt mit der Zeit</li><li><b>Maximale Kapazität sinkt</b></li></ul>`],
+[2,"Was ist Korrosion? Welche Verläufe und Arten gibt es?",
+`<p>Von der <b>Oberfläche</b> ausgehende chemische, physikalisch-chemische oder elektrochemische <b>Reaktion eines Werkstoffs mit dem umgebenden Medium</b>; unerwünschte Grenzflächenreaktion.</p><ul><li>Verläufe der Schichtdicke über die Zeit: linear, parabolisch, „break-away“-Oxidation, „katastrophale“ Oxidation</li><li>Arten nach Beanspruchung: <b>elektrochemisch, mechanisch, tribologisch</b></li></ul>`],
+[2,"Überbeanspruchung: welche Folgen bei statischer vs. zeitlich veränderlicher Beanspruchung?",
+`<ul><li><b>Statisch/quasistatisch:</b> unzulässige plastische Verformung, Gewaltbruch, Zeitstand- bzw. Kriechbruch</li><li><b>Zeitlich veränderlich:</b> Überschreiten von Dauerfestigkeit, Zeitfestigkeit, Betriebsfestigkeit</li></ul><p>Beispiele: Brandrisse an der Kurbelwelle durch Mangelschmierung (thermisch), plastisch verformtes Zahnrad (mechanisch)</p>`],
+[2,"Was sind Schadensgrenzen und wodurch steigt das Versagensrisiko?",
+`<ul><li><b>Querschnittsverminderung</b>: Verschleiß, Korrosion</li><li><b>Festigkeitsverminderung</b>: Alterung, Ermüdung</li></ul><p>Gegenmaßnahme: Sicherheitsfaktor S festlegen, Schadensgrenzen (Toleranzen) setzen und überprüfen.</p><p class="merk">Wird die Schadensgrenze überschritten, tritt der <b>Ausfall</b> ein; die Verfügbarkeit ist nicht mehr gesichert.</p>`],
+[2,"Was ist die (Rest-)Lebensdauer und wovon hängt sie ab?",
+`<ul><li>Funktionsdauer = <b>Zeit bis zum Ausfall</b> einer technischen Einheit</li><li>Einheiten: Stunden, Monate, Laufleistung, Schaltvorgänge, Betriebsstunden</li><li>Einflüsse: Prophylaxe, Diagnose, Therapie, Erneuerung von Komponenten, Zuverlässigkeit der Komponenten</li></ul><p>Die Restlebensdauer ist zentral für <b>Sicherheit und Verfügbarkeit</b>.</p>`],
+[2,"Welche Arten von Beanspruchung unterscheidet man?",
+`<ul><li><b>Äußere:</b> Umwelt (Temperatur, Schmutz), Nachbaranlagen (Schwingungen), Betriebsparameter</li><li><b>Innere:</b> aus Fertigung &amp; Montage (Vorspannung, Vorschädigung)</li><li><b>Betriebsprozesse:</b> stationär/instationär (kleine Gradienten) und außergewöhnlich (große Gradienten)</li></ul>`],
+[2,"Wie ist der Sicherheitsfaktor S definiert und warum ist Sicherheit stochastisch?",
+`<p class="f">S = Beanspruchbarkeit / Beanspruchung</p><p>Beide Größen <b>streuen</b> (Wahrscheinlichkeitsverteilungen). Wo sich die Verteilungen <b>überlappen</b>, entsteht das <b>Risiko</b> des Versagens.</p><ul><li>Streuung der Beanspruchung: innere Ursachen (Vorgeschichte, Betriebsparameter) und äußere (Umwelt, Bediener)</li><li>Streuung der Beanspruchbarkeit: Genauigkeit der Auslegung, Fertigungsqualität, Werkstoffeigenschaften</li></ul>`],
+[2,"Stochastik der Schädigung: Was passiert über die Nutzungszeit?",
+`<p>Die <b>Beanspruchung bleibt</b> im Betrieb etwa konstant, die <b>Beanspruchbarkeit sinkt</b> durch Schädigung. Die Verteilungen rücken zusammen, die Überlappung wächst.</p><p class="merk">Die Versagenswahrscheinlichkeit <b>steigt</b> mit fortlaufender Nutzungszeit.</p>`],
+[2,"Was umfasst der Begriff Verlässlichkeit (Dependability)?",
+`<ul><li><b>Bedrohungen:</b> Fehler → Störung → Ausfall</li><li><b>Verbesserungsmethoden:</b> Fehlervermeidung, Fehlertoleranz, Fehlerbeseitigung, Fehlervorhersage</li><li><b>Attribute:</b> Zuverlässigkeit, Verfügbarkeit, Instandhaltbarkeit (Wartbarkeit, Instandhaltungsbereitschaft), (Ausfall-)Sicherheit, Vertraulichkeit</li></ul>`],
+[2,"Was ist Zuverlässigkeit?",
+`<p>Die <b>Wahrscheinlichkeit</b>, dass eine Einheit ihre Funktion unter normalen Betriebsbedingungen in einem <b>bestimmten Zeitintervall</b> erfüllt (Überlebenswahrscheinlichkeit).</p><ul><li>Bedingte Wahrscheinlichkeit, Funktion der Zeit</li><li>Annahme: bei Inbetriebnahme funktionstüchtig</li><li>„Zeitbezogener Aspekt der Qualität“</li></ul>`],
+[2,"Zuverlässigkeitsfunktion R(t): Formel und Bedeutung?",
+`<p class="f">R(t) = N(t) / N<sub>0</sub></p><ul><li>R(t): Überlebenswahrscheinlichkeit (von 1 fallend auf 0)</li><li>N(t): Anzahl der noch nicht ausgefallenen Elemente zum Zeitpunkt t</li><li>N<sub>0</sub>: Gesamtzahl der untersuchten Elemente</li></ul>`],
+[2,"Ausfallwahrscheinlichkeit F(t) und Ausfalldichte f(t): Formeln?",
+`<p class="f">F(t) = 1 − R(t) = 1 − N(t)/N<sub>0</sub></p><p class="f">f(t) = dF(t)/dt = −dR(t)/dt</p><p>F(t) steigt von 0 auf 1. f(t) gibt an, wie viele Einheiten pro Zeitintervall (bezogen auf den Anfangsbestand) ausfallen.</p>`],
+[2,"Ausfallrate λ(t): Formel und Bedeutung?",
+`<p class="f">λ(t) = ΔN(t) / (Δt · N(t)) = f(t) / R(t)</p><p>Wahrscheinlichkeit eines Ausfalls im nächsten Zeitintervall <b>nach einer ausfallfreien Zeit</b> (bezogen auf die noch intakten Einheiten). Auch: Fehlerratenfunktion.</p>`],
+[2,"Was ist Verfügbarkeit A(t)? Was ist der typische Denkfehler?",
+`<p>Wahrscheinlichkeit, dass eine Einheit in einem bestimmten Zeitraum <b>einsatzfähig</b> ist, d. h. Minderung der möglichen Betriebszeit durch Schäden und Störungen.</p><p class="merk">Ein System kann eine <b>hohe Verfügbarkeit haben und trotzdem oft ausfallen</b>, wenn die Reparaturzeit entsprechend kurz ist.</p>`],
+[2,"Was ist Instandhaltbarkeit (Wartbarkeit) M(t)?",
+`<p>Kenngröße/Wahrscheinlichkeit für die <b>Reparaturzeit</b> einer defekten Einheit. Die Reparaturzeit umfasst:</p><ol><li>Lokalisierung des Fehlers</li><li>Durchführung korrektiver Maßnahmen (Austausch, Ersatz)</li><li>Wiederinbetriebnahme</li></ol>`],
+[2,"Was ist (Ausfall-)Sicherheit S(t)?",
+`<ul><li>Einheit ist im Zeitraum intakt <b>oder</b> geht bei einem Defekt in einen <b>Fail-Safe-Zustand</b> über</li><li>Keine Beeinträchtigung der Systemfunktionalität</li><li>Vorbestimmte Sicherheit gegen Ausfall; erhöht durch <b>Redundanz</b></li></ul>`],
+[2,"Wie ist ein Ausfall definiert?",
+`<p>Der <b>Zeitpunkt</b>, an dem das System seine <b>Funktionalität verliert</b>; Abweichung vom korrekten Verhalten (Fehlereintritt, nicht spezifizierte Zustände). Situationsbezeichnung für das Top-Level-System.</p><p>Kette: Fehler → Störung → Ausfall</p>`],
+[2,"Badewannenkurve: Welche drei Phasen und wie verläuft λ(t)?",
+`<table><tr><th>Phase</th><th>λ(t)</th></tr><tr><td><b>Frühausfälle</b></td><td>sinkt</td></tr><tr><td><b>Zufallsausfälle</b></td><td>konstant</td></tr><tr><td><b>Verschleiß-/Abnutzungsausfälle</b></td><td>steigt</td></tr></table><p>Am Ende sinkt die Verfügbarkeit durch gehäufte Ausfälle so weit, dass kein geordneter Betrieb mehr möglich ist.</p>`],
+[2,"Badewannenkurve: Ausfallursachen je Phase?",
+`<ul><li><b>Früh:</b> bei Auslieferung bestehende Fehler: Auslegungs-, Montage-, Fertigungs-, Materialfehler</li><li><b>Zufall:</b> Fehlbedienung, Umgebungsbedingungen nicht eingehalten, Instandhaltung nicht eingehalten; unterschiedliche Lebensdauern der Komponenten</li><li><b>Verschleiß:</b> Ende der Lebensdauer: Abrieb, Dauer-/Wechselbelastung (Risse, Kriechen), Materialveränderung (Korrosion, Versprödung)</li></ul>`],
+[2,"Wie beeinflusst Instandhaltung (Revisionen) die Badewannenkurve?",
+`<p>Durch Haupt- und Kurzrevisionen wird die Ausfallrate in der Verschleißphase immer wieder <b>zurückgesetzt</b>. Die Nutzungsphase mit niedriger Ausfallrate wird verlängert. Nach jeder Revision können kurz wieder Frühausfälle auftreten.</p>`],
+[2,"Sechs Störungsmuster (RCM-Studie, Luftfahrt): Was ist die zentrale Erkenntnis?",
+`<ul><li>Badewannenkurve: nur <b>4 %</b></li><li>Steigend am Ende: 2 % · leicht steigend: 5 %</li><li>Niedrig am Anfang, dann konstant: 7 %</li><li>Konstant: 14 %</li><li>Hohe Frühausfallrate, dann konstant: <b>68 %</b></li></ul><p class="merk">Nur ein kleiner Teil der Störungen ist <b>altersabhängig</b>. Feste Austauschintervalle helfen daher oft nicht. Achtung beim Übertragen auf andere Branchen!</p>`],
+[2,"Mittlere Lebensdauer E(T) und MTBF?",
+`<p class="f">E(T) = ∫<sub>0</sub><sup>∞</sup> t · f(t) dt = ∫<sub>0</sub><sup>∞</sup> R(t) dt</p><ul><li>Mittlere Betriebszeit zwischen Betriebsbeginn und Ausfall</li><li>Bei <b>konstanter Ausfallrate</b>: E(T) = <b>MTBF</b> (Mean Time Between Failure) = 1/λ</li><li>Abnutzungsvorrat: AV(T) = ∫<sub>0</sub><sup>t<sub>max</sub></sup> R(t) dt</li></ul>`],
+[2,"Was ist Redundanz?",
+`<p>Vorhandensein <b>funktional gleicher Ressourcen</b> (Ausweichaggregate), die nur im Notfall zum Einsatz kommen, um den Ausfall eines Systems abzufangen.</p><p>Sicherheitstechnisch: Parallelsystem, <b>räumliche Trennung</b>, <b>unterschiedliche Hersteller</b> (gegen gemeinsame Fehlerursachen).</p>`],
+[2,"Zuverlässigkeit eines Seriensystems?",
+`<p class="f">R<sub>ges</sub>(t) = R<sub>1</sub>(t) · R<sub>2</sub>(t) · … · R<sub>n</sub>(t)</p><p>Funktioniert nur, wenn <b>alle</b> Komponenten funktionieren. Der Ausfall einer Komponente führt zum Totalausfall. R<sub>ges</sub> ist immer kleiner als die schwächste Komponente.</p>`],
+[2,"Zuverlässigkeit eines Parallelsystems?",
+`<p class="f">R<sub>ges</sub>(t) = 1 − ∏ (1 − R<sub>i</sub>(t))</p><p>Funktioniert, solange <b>mindestens eine</b> Komponente funktioniert. Erst der Ausfall <b>aller</b> Komponenten führt zum Totalausfall.</p>`],
+[2,"Rechne: 3 Komponenten mit je R = 0,9, einmal in Serie, einmal parallel.",
+`<p><b>Serie:</b> 0,9 · 0,9 · 0,9 = <b>0,729</b> (72,9 %)</p><p><b>Parallel:</b> 1 − (0,1)³ = 1 − 0,001 = <b>0,999</b> (99,9 %)</p><p>Gemischte Systeme (Parallel-Serien-System): zuerst parallele Blöcke zusammenfassen, dann in Serie multiplizieren.</p>`],
+[2,"Warum sinkt die Zuverlässigkeit komplexer Anlagen so stark?",
+`<p>Anlagen sind hierarchisch aufgebaut (System → Anlage → Baugruppe → Bauteil) und wirken meist <b>in Serie</b>. Mit der Anzahl der Komponenten sinkt R<sub>ges</sub> stark.</p><p>Beispiel: 100 Komponenten mit je 99 % → 0,99<sup>100</sup> ≈ <b>0,37</b></p>`],
+[2,"Welche Maßnahmen erhöhen die Zuverlässigkeit?",
+`<ul><li>Inspektion, Wartung, Instandhaltung</li><li>Konstruktive Maßnahmen</li><li>Redundante Systeme</li><li>Korrekte Bedienung</li><li>Hohe Fertigungsqualität</li><li>Kontrolle von Konstruktion und Ausführung</li></ul>`],
+[2,"Warum sind Kenntnisse über Abnutzungsvorgänge wichtig?",
+`<p>Ohne sie lassen sich keine Schlussfolgerungen ziehen zu:</p><ul><li>Effizienz und Ausschöpfung des Abnutzungsvorrats</li><li>Betriebsgrenzen und IH-Strategie</li><li>Garantie und Haftung</li><li>Ausfallwahrscheinlichkeit, Verfügbarkeit und Sicherheit</li></ul>`],
+
+/* ================= 3 STRATEGIEN ================= */
+[3,"Ordne die Entwicklung der IH-Strategien den industriellen Revolutionen zu.",
+`<table><tr><td>1850–1900 · Industrie 1.0</td><td><b>Ausfallbasiert</b> (reparieren)</td></tr><tr><td>1900–1950 · Industrie 2.0</td><td><b>Zeitbasiert</b> (vorbeugen, feste Intervalle)</td></tr><tr><td>1950–1970</td><td><b>Vorbeugende IH</b>, Preventive Maintenance, Anfänge TPM</td></tr><tr><td>1970–2010 · Industrie 3.0</td><td>Zustandsbasiert, TPM, RCM, EDV/SAP</td></tr><tr><td>2000–2008</td><td><b>Risikobasiert</b> (RBM, RCM, LCC)</td></tr><tr><td>ab 2010 · Industrie 4.0</td><td><b>Vorausschauend</b> / intelligent vernetzt</td></tr></table>`],
+[3,"Merkmale der Instandhaltung in Industrie 1.0 und 2.0?",
+`<p><b>1.0 (Dampfkraft):</b> einfache Maschinen, kein strukturiertes Vorgehen, nur ausfallbedingte Maßnahmen, Reparatur durch Produktionsmitarbeiter, keine IH-Fachkräfte.</p><p><b>2.0 (Elektrizität, Massenfertigung):</b> komplexere Anlagen, Arbeitsteilung Produktion/IH, Fachausbildung, Standardisierung, erste Wartungs- und Inspektionspläne (MIL-Standards), erfahrungsbasierte feste Intervalle.</p>`],
+[3,"Wofür stehen Taylor und Ford?",
+`<ul><li><b>F. W. Taylor</b>: 1911 „Principles of Scientific Management“; Vereinfachung und Standardisierung von Arbeitsabläufen, <b>Trennung von Denken und Handeln</b></li><li><b>H. Ford</b>: Massenproduktion, Fließband (Ford T-Modell 1908) nach Taylors Regeln</li></ul>`],
+[3,"Wichtige Meilensteine: 1966, 1969, 1974, 2014?",
+`<ul><li><b>1966</b>: Krupp Rheinhausen führt vorbeugende IH im Walzwerk ein</li><li><b>1969</b>: Japan Institute of Plant Engineers gegründet (Anfänge TPM)</li><li><b>1974</b>: <b>DIN 31051</b> „Grundlagen der Instandhaltung“ veröffentlicht</li><li><b>2014</b>: DIN EN 15628 „Qualifikation des IH-Personals“</li></ul>`],
+[3,"Wie verändern sich die Anforderungen an IH-Personal in Industrie 4.0?",
+`<p>Komplexität und Vernetzung steigen. Manuelle Fertigkeiten werden unwichtiger, <b>Methodenkompetenz, Systemanalysefähigkeit</b> und <b>soziale Kompetenz</b> werden wichtiger. Neue Aufgabe: <b>Datensicherheit</b> der automatisierten Anlagen (Prozesssicherheit).</p>`],
+[3,"Gliedere die Instandhaltungsstrategien (Basis- und moderne Strategien).",
+`<ul><li><b>Reaktiv:</b> ausfallbasiert</li><li><b>Vorbeugend:</b> zeitbasiert, zustandsbasiert, vorausschauend</li><li><b>Moderne Strategien:</b> zuverlässigkeitsorientiert (RCM), risikoorientiert (RBM)</li></ul><p class="merk">IH-Strategien legen fest, <b>ob</b> und aus welchem <b>Anlass</b> IH-Tätigkeiten von <b>wem</b> und mit welcher <b>Häufigkeit</b> durchgeführt werden.</p>`],
+[3,"Ausfallbasierte Instandhaltung: Merkmale und Synonyme?",
+`<ul><li>Reaktiv/korrektiv, <b>ungeplant</b>: Reaktion erst nach Funktionsverlust</li><li><b>Maximale Ausschöpfung</b> des Abnutzungsvorrats</li><li>Keine Maßnahmen zur Fehlervermeidung</li><li><b>Fokus: Instandsetzung</b></li></ul><p>Synonyme: Breakdown Maintenance, <b>Feuerwehrstrategie</b>, ereignis-/schadensorientiert, fehlerabwartend, störungsbedingt</p>`],
+[3,"Ausfallbasierte IH: Vor- und Nachteile?",
+`<table><tr><th>Vorteile</th><th>Nachteile</th></tr><tr><td>Volle Ausschöpfung des Abnutzungsvorrats; geringer Planungs-, Personal- und Informationsbedarf; einfach einzuführen; keine laufenden Kosten für W/I/V</td><td>Keine Planbarkeit; lange ungeplante Stillstände; hohe Ausfall-, Folge- und Ersatzteilkosten; Arbeit unter Termindruck; schlechte Verfügbarkeit; Sicherheits- und Qualitätsrisiko; Kosten schwer kalkulierbar; Teile oft nicht wiederverwendbar</td></tr></table>`],
+[3,"Woraus setzt sich die Stillstandszeit bei ausfallbasierter IH zusammen?",
+`<p>Anlage fällt aus → Suche nach jemandem, der sie instand setzen kann → <b>Fehlerdiagnose</b> → <b>Ersatzteilsuche</b> → Instandsetzung → Test → Wiedereingliederung in den Prozess</p><p class="merk">Die eigentliche Instandsetzung ist nur ein kleiner Teil der Stillstandszeit. Heute nur sinnvoll, wenn eine <b>redundante Einheit</b> vorhanden ist.</p>`],
+[3,"Wann ist ausfallbasierte IH sinnvoll?",
+`<ul><li>Kleine, günstige Einheiten</li><li><b>Unkritisch</b> für Sicherheit, Umwelt und Auslastung</li><li>Geringe Ausfallwahrscheinlichkeit</li><li><b>Redundanz</b> vorhanden</li></ul><p>Alltag: z. B. Glühbirne, Toaster, Wasserkocher</p>`],
+[3,"Zeitbasierte Instandhaltung: Merkmale?",
+`<ul><li>Periodisch vorbeugend, <b>geplant</b> in festen, regelmäßigen Intervallen</li><li>Maßnahmen <b>weit vor Erreichen der Abnutzungsgrenze</b>, unabhängig vom tatsächlichen Zustand</li><li><b>Fokus: Wartung</b> (Time Based Maintenance)</li></ul>`],
+[3,"Zeitbasierte IH: Nach welchen Intervallen und Grundlagen?",
+`<ul><li><b>Kalenderzeit</b> (Wochen, Monate, Jahre), z. B. Revisionen</li><li><b>Nutzungszeit</b> (Betriebsstunden)</li><li><b>Leistung</b> (Strecke, Umdrehungen, Stückzahl, Volumen)</li><li>Mischformen</li></ul><p>Festlegung nach: Herstellerangaben, Erfahrungswerten, gesetzlichen Vorgaben</p><p>Alltag: Ölwechsel alle X km, Heizungswartung jährlich, HU/TÜV</p>`],
+[3,"Zeitbasierte IH: Vor- und Nachteile?",
+`<table><tr><th>Vorteile</th><th>Nachteile</th></tr><tr><td>Hohe Planbarkeit (Termine, Material, Personal, Stillstände); hohe Zuverlässigkeit und Verfügbarkeit; weniger Folgeschäden; kaum unerwartete Stillstände; geringere Ausfallkosten</td><td><b>Schlechte Ausnutzung</b> des Abnutzungsvorrats; IH unabhängig vom Zustand; hohe Personal- und Ersatzteilkosten; unnötige Instandsetzungen; Ausfallverhalten wird nicht erkannt; Ressourcenverbrauch (Schmierstoffe, Energie)</td></tr></table>`],
+[3,"Wann ist zeitbasierte IH sinnvoll?",
+`<ul><li><b>Steigende Ausfallrate</b> (altersabhängiger Verschleiß)</li><li>Mittlere Zeit zwischen zwei Schäden <b>bekannt</b></li><li><b>Geringe Streuung</b> der Lebensdauer</li><li>Technisch machbar; gesetzliche Vorgaben</li></ul>`],
+[3,"Zustandsbasierte Instandhaltung: Merkmale?",
+`<ul><li>Vorbeugend, geplant nach <b>Zustand</b> (definiertem Abnutzungsniveau)</li><li>Diagnose in Intervallen oder <b>permanente Überwachung</b> (Condition Monitoring)</li><li>Maßnahmen nach Ergebnis der Zustandsmessung, vor Funktionsverlust; Grenzwert wird ausgereizt</li><li><b>Fokus: Inspektion</b> (Condition Based Maintenance)</li></ul><p>Alltag: Reifenprofil, Bremsbelag-Verschleißanzeige</p>`],
+[3,"Zustandsbasierte IH: Vor- und Nachteile?",
+`<table><tr><th>Vorteile</th><th>Nachteile</th></tr><tr><td>Bessere Ausnutzung des Abnutzungsvorrats; längere Nutzungsdauer; hohe Verfügbarkeit; geringere Ersatzteilkosten; weniger ungeplante Ausfälle; besserer Komponentenzustand (Wiederverwendung); planbare Stillstände</td><td>Kosten für Technik (CM) und Personal; <b>nicht alle Fehler messbar</b>; Diagnosesysteme nötig; große Datenmengen, Zeitdruck bei Entscheidungen; hohe Inspektionskosten; hohe Fachkompetenz nötig</td></tr></table>`],
+[3,"Zustandsbasierte IH: Ziele und Umsetzungsschritte?",
+`<p><b>Ziele:</b> unerwartete Ausfälle minimieren, Maßnahmen in Betriebspausen planen, Effizienz durch Zustandswissen.</p><ol><li>Kritische Systemeinheiten identifizieren</li><li>Abnutzungsursachen und -auswirkungen definieren</li><li>Messgrößen und Grenzwerte festlegen</li><li>Messtechnik festlegen</li><li>Testläufe auswerten</li><li>Maßnahmen abhängig vom Zustand bestimmen</li></ol>`],
+[3,"Wann ist zustandsbasierte IH sinnvoll?",
+`<ul><li>Bei <b>Zufallsausfällen</b> (keine klare Altersabhängigkeit)</li><li>Wenn der <b>Zustand messbar/ermittelbar</b> ist</li><li>Wenn vorbeugende Eingriffe selbst Störungen verursachen würden</li></ul>`],
+[3,"Vorausschauende Instandhaltung (Predictive Maintenance): Merkmale?",
+`<ul><li>Geplante IH nach <b>Prognosen</b>; Weiterentwicklung der zustandsbasierten IH</li><li>„Instandhaltung zum richtigen Zeitpunkt“ durch technische Diagnostik, <b>automatisierte Datenanalyse</b>, Prognosemodelle</li><li>Verschleißmodelle → Abnutzungsvorrat und <b>verbleibende Betriebszeit</b> ermitteln</li><li>Basis: vergangene und gegenwärtige Daten</li></ul>`],
+[3,"Grundphilosophie der vorausschauenden IH (VDMA)?",
+`<ol><li><b>Interkonnektivität</b>: vernetzte Wertschöpfungsketten</li><li><b>Digitale Daten</b>: sammeln, aufbereiten, analysieren</li><li><b>Automation</b>: autonome, selbstlernende Systeme</li><li><b>Direkte Wertschöpfung</b>: Remote-Eingriff</li></ol><p>Analysestufen: Was ist passiert? → Warum ist es passiert? → <b>Was wird passieren?</b></p>`],
+[3,"Vorausschauende IH: Vor- und Nachteile?",
+`<table><tr><th>Vorteile</th><th>Nachteile</th></tr><tr><td>Weniger ungeplante Stillstände; maximale Lebensdauer; Fehlerursachen eingrenzbar; Anomalien aus historischen Daten erkennen; Wartung nur wenn nötig („on point“); geringere Folgekosten; höhere Rentabilität</td><td>Bewertung und Umsetzung zeitaufwendig; Schulung der Mitarbeiter; komplexe Daten und Analysen; Investition in IH-Werkzeuge und -Systeme</td></tr></table>`],
+[3,"Wie schöpfen die vier Basisstrategien den Abnutzungsvorrat aus?",
+`<ul><li><b>Ausfallbasiert:</b> vollständig (bis zum Ausfall), aber ungeplant</li><li><b>Zeitbasiert:</b> schlecht, Tausch weit vor der Grenze (Effizienzverlust)</li><li><b>Zustandsbasiert:</b> gut, Tausch bei Erreichen der Warn-/Grenzwerte</li><li><b>Vorausschauend:</b> optimal, Tausch kurz vor dem prognostizierten Ausfall</li></ul>`],
+[3,"Was bedeutet „individuelle Abnutzung“ beim Übergang präventiv → prädiktiv?",
+`<p>Die individuelle Nutzung beeinflusst den Abnutzungsverlauf. Jede Komponente hat eigene Betriebsparameter, die sich zu einem <b>Nutzungsprofil</b> zusammenfassen lassen; eine Anlage hat je nach Betriebsart mehrere Profile. Feste Intervalle passen deshalb nicht für jede Einheit.</p>`],
+[3,"Was ist zuverlässigkeitsorientierte Instandhaltung (RCM)?",
+`<p><b>Reliability-Centred Maintenance:</b> eine Methode zur Festlegung einer <b>wirtschaftlichen IH-Strategie für jede einzelne Komponente</b>, damit sie ihre Funktion unter den gegebenen Betriebsbedingungen weiter erfüllt.</p><ul><li>Weiterentwicklung der zustandsorientierten IH, prioritätsorientiert</li><li>Bewertung nach Zustand <b>und</b> Bedeutung für die Verfügbarkeit</li><li>Basis: Störungswahrscheinlichkeiten und <b>FMEA</b></li></ul>`],
+[3,"Ziele und Leitsatz von RCM?",
+`<ul><li>Individuelle IH-Strategie je Komponente</li><li>Verständnis von Funktion, Schadensentstehung und Störungsvermeidung</li><li>Mehr Anlageneffizienz und Verfügbarkeit, Erhalt der Funktion</li></ul><p class="merk">„So viel Instandhaltung wie <b>nötig</b>, so wenig wie <b>möglich</b>!“</p>`],
+[3,"RCM-Team: Wer gehört dazu und was macht der RCM-Spezialist?",
+`<p>Kleines, bereichsübergreifendes Team: <b>RCM-Spezialist/Moderator</b>, Betriebsleiter, technischer Leiter, Fachkraft, Maschinenbediener, externer Spezialist.</p><p><b>RCM-Spezialist:</b> zeigt Systemgrenzen auf, weist auf Zusammenhänge hin, sichert richtige Analysen und Verständnis aller, verantwortet Erfolg/Tempo, stimmt sich mit Projektmanagern und Sponsoren ab.</p><p>Auswahl der Ausrüstung: Reparaturkosten &gt; Kosten vorbeugender Maßnahmen</p>`],
+[3,"Die sieben RCM-Fragen nach Moubray?",
+`<ol><li>Welche <b>Funktion</b> erfüllt die Einheit?</li><li>Wie kann sie gestört sein? (<b>Funktionsausfall</b>)</li><li>Wodurch wird die Störung verursacht? (<b>Ausfallursache</b>)</li><li>Was passiert, wenn sie auftritt? (<b>Ausfallwirkung</b>)</li><li>Wie gravierend ist sie? (<b>Fehlerfolgen</b>)</li><li>Kann sie vorhergesagt werden? (<b>proaktive Aufgaben/Intervalle</b>)</li><li>Was tun, wenn nicht vorhersagbar? (<b>Standardaktion</b>)</li></ol><p>Fragen 1–5 entsprechen einer FMEA (DIN 60812).</p>`],
+[3,"RCM Schritt 1 und 2: Funktion und Funktionsausfall, was wird festgelegt?",
+`<p><b>Funktion:</b> Grenzen, Leistungsnorm, Input/Output; <b>Primärfunktion</b> (Geschwindigkeit, Qualität, Kapazität) und <b>Sekundärfunktion</b> (Wirtschaftlichkeit, Sicherheit, Bedienbarkeit). Bsp.: Förderband transportiert Güter.</p><p><b>Funktionsausfall:</b> Wie wird die Leistungsnorm nicht erfüllt? Bsp.: Band steht oder läuft zu langsam.</p><p class="merk">Nicht nur Verschleiß berücksichtigen, auch <b>menschliche Fehler und Konstruktionsschwächen</b>!</p>`],
+[3,"RCM Schritt 3: Typische Ausfallursachen?",
+`<p>Grundursachen ermitteln, mit Hilfe von Bedienern, erfahrenen Technikern und Experten:</p><ul><li>Verschmutzung</li><li>Bedienerfehler</li><li>Montagefehler</li><li>Mangelnde Schmierung</li><li>Materialermüdung</li></ul>`],
+[3,"RCM Schritt 4: In welche vier Gruppen werden Störungsfolgen eingeteilt?",
+`<ol><li><b>Verdeckte</b> Störungsfolgen</li><li>Folgen für <b>Sicherheit und Umwelt</b></li><li><b>Betriebsabhängige</b> Folgen</li><li><b>Betriebsunabhängige</b> Folgen</li></ol><p>Analyse z. B. mittels FMEA</p>`],
+[3,"RCM Schritt 5: Mit welchen Techniken wird die Schwere bewertet?",
+`<ul><li><b>FMEA</b>: Fehlermöglichkeits- und Einflussanalyse</li><li><b>FTA</b>: Fehlerbaumanalyse</li><li><b>HAZOP / PAAG</b>: Gefährdungsanalyse</li><li><b>RBI</b>: risikobasierte Inspektion</li></ul><p>Ziel: Priorität der Komponente unter realen Bedingungen beurteilen; bei großen Anlagen ressourcenintensiv.</p>`],
+[3,"RCM Schritt 6 und 7: Was, wenn eine Störung (nicht) vorhersagbar ist?",
+`<p><b>Schritt 6:</b> Je Komponente passende Strategie wählen (zeit- oder zustandsbasiert), mit Blick auf Instandhaltbarkeit und Wirtschaftlichkeit. Gibt es keine passende Strategie: <b>Neukonstruktion, Funktionsprüfung</b> oder <b>keine geplante Maßnahme</b>.</p><p><b>Schritt 7 (Standardaktion):</b> Standardmaßnahmen einführen, um Störungen schneller zu erkennen, plus kontinuierliche Überprüfung und Verbesserung.</p>`],
+[3,"Wie werden RCM-Ergebnisse geprüft und umgesetzt?",
+`<p>Freigabe der Team-Entscheidung durch leitende Manager, dann Umsetzung:</p><ul><li>Wartungspläne → Wartungskontrollsystem</li><li>Geänderte Betriebsverfahren → Standardbetriebsverfahren</li><li>Konstruktionsänderung → Auftrag an Konstruktion</li></ul>`],
+[3,"RCM-Strategie am Beispiel Energieversorgung: Zustands- und Wichtigkeitsindex?",
+`<ol><li><b>Zustandsindex c</b> ermitteln (c = 100 → schlechter Zustand): Alter, Technologie, Einbauort, Inspektion/Monitoring, Betriebserfahrung</li><li><b>Wichtigkeitsindex i</b> (0 = unwichtig, 100 = sehr wichtig): Spannungsebene, Einsatzort, Investitionskosten, Fehlerrate, Systemeinfluss, Kundenart</li><li>Zusammenführen → Reihenfolge (Abstand d)</li><li>Strategie festlegen</li></ol><p>Bereiche: <b>I</b> Ersatz · <b>II</b> Wartung · <b>III</b> Inspektion (gesetzlicher Rahmen). Der Winkel gewichtet Zustand vs. Wichtigkeit.</p>`],
+[3,"RCM-Matrix: Welche Strategie bei welchem Zustand und welcher Bedeutung?",
+`<table><tr><th>Zustand ↓ / Bedeutung →</th><th>niedrig</th><th>mittel</th><th>hoch</th></tr>
+<tr><td>schlecht</td><td>Instandsetzung (ausfallorientiert)</td><td>Diagnose/Monitoring</td><td>Austausch/Teilaustausch</td></tr>
+<tr><td>mäßig</td><td>keine Aktion</td><td>keine Aktion, ggf. Diagnose</td><td>Diagnose/Monitoring</td></tr>
+<tr><td>gut</td><td>keine Aktion</td><td>keine Aktion</td><td>Monitoring (zeitorientiert)</td></tr></table><p>Prinzip: Unwichtig → ausfallbasiert; wichtig + schlecht → zustandsbasiert bzw. Tausch.</p>`],
+[3,"RCM: Vor- und Nachteile?",
+`<table><tr><th>Vorteile</th><th>Nachteile</th></tr><tr><td>Effektivere IH durch gezielte Maßnahmen; umfassende IH-Datenbank; mehr Sicherheit und Umweltschutz; bessere Betriebsleistung; längere Nutzungsdauer kapitalintensiver Anlagen; höhere Mitarbeitermotivation</td><td>Hohe Fachkompetenz nötig; aufwendige Analyse → <b>nur bei kritischen Einheiten sinnvoll</b>; Ausfallfolgekosten schwer kalkulierbar; regelmäßige Überprüfungen teuer</td></tr></table>`],
+[3,"RCM-Praxisbeispiel National Ignition Facility (NIF)?",
+`<ul><li>Laseranlage, Größe ca. 3 Fußballfelder; Ausfall sehr teuer</li><li>RCM machte Routinearbeiten überflüssig, Fokus auf die wichtigsten Maschinen</li><li>Ersparnis ca. <b>2 Mio. $</b>; in einem Fall 80.000 $ und 8 h Ausfallzeit vermieden</li><li>Backup-Maschinen werden weniger gewartet</li></ul><p>NASA Marshall Space Flight Center: über 30.000 $ gespart, zusätzliche Sensoren/Kameras.</p>`],
+[3,"Was ist risikobasierte Instandhaltung (RBM)?",
+`<ul><li>Ähnlich RCM; geplante, vorbeugende IH auf Basis gemessener <b>Ausfalldaten und Statistiken</b></li><li>Steuergröße: <b>Risiko</b>; Umfang und Intensität der IH richten sich nach der Risikobewertung</li><li>Maßgeschneidert je Komponente; Kosten der IH vs. erreichte Risikominderung</li></ul><p class="merk">Ziel: optimale Verfügbarkeit bei möglichst effizientem Kosteneinsatz unter Einhaltung der Sicherheitsvorgaben.</p>`],
+[3,"Wie ist Risiko definiert?",
+`<p class="f">Risiko = W · A</p><p><b>W</b>: Eintrittswahrscheinlichkeit des Ereignisses<br><b>A</b>: Schadensausmaß (Konsequenz)</p><p>Darstellung in der <b>Risikomatrix</b> (Wahrscheinlichkeit × Konsequenz → geringes, mittleres, hohes Risiko); Basis für die Strategiewahl.</p>`],
+[3,"Was bedeutet Risikomanagement in der IH, und was nicht?",
+`<ul><li><b>Nicht:</b> sich aus Sparsamkeit bewusst höherem Betriebsrisiko aussetzen</li><li><b>Sondern:</b> die Betriebsmittel identifizieren, die im Fehlerfall den <b>größten Schaden</b> verursachen würden. Sie erhalten bei der präventiven IH-Planung <b>höchste Priorität</b>.</li></ul>`],
+[3,"Prozess des Risikomanagements in der RBM?",
+`<ol><li>Kritische Anlage auswählen</li><li><b>Risikoidentifikation</b>: Störung und Konsequenzen (Personensicherheit, Umwelt, Wirtschaft)</li><li><b>Störungswahrscheinlichkeit</b>: Fehlerraten, Versagensmodelle</li><li><b>Risikobeurteilung/-bewertung</b></li><li><b>Risikobehandlung/-steuerung</b>: Maßnahmen bewerten</li><li><b>Risikokontrolle</b>: laufend überwachen, neue Risiken ermitteln</li></ol>`],
+[3,"Methoden zur Risikoidentifikation?",
+`<table><tr><th>Analytisch</th><th>Kreativitätsmethoden</th></tr><tr><td>Fehlerbaumanalyse (FTA), FMEA, Ishikawa-Diagramm, Ergebnisbaumanalyse</td><td>Brainstorming, Brainwriting, Methode 6-3-5, morphologische Analyse</td></tr></table>`],
+[3,"Methoden zur Risikobewertung?",
+`<ul><li><b>Indikator-/Scorecard-Ansätze</b></li><li><b>Befragungstechniken &amp; Szenarioanalyse</b> (Was-wäre-wenn)</li><li><b>Kausale Methoden</b>: Bayes-Netze, neuronale Netze</li><li><b>Stochastische Methoden</b>: Monte-Carlo-Simulation, Vollenumeration</li></ul>`],
+[3,"Welche Strategien der Risikosteuerung gibt es?",
+`<ul><li><b>Vermeiden</b>: System neu definieren, sodass die Gefahr wegfällt</li><li><b>Vermindern</b>: Risikoreduktion (Informationen sammeln, Komponenten verbessern)</li><li><b>Übertragen/begrenzen</b>: Versicherungen, Rücklagen</li><li><b>Akzeptieren</b>: bewusst nichts tun</li></ul><p>Was übrig bleibt, ist das <b>Restrisiko</b>.</p>`],
+[3,"Risikobasierte IH: Vor- und Nachteile?",
+`<table><tr><th>Vorteile</th><th>Nachteile</th></tr><tr><td>Risiko als quantitative Vergleichsgrundlage; optimiertes Kosten-Nutzen-Verhältnis; geringeres Gesamtrisiko durch Fokus auf kritische Bereiche; IH-Aufwand nach Risiko auf Einheiten umlegbar</td><td>Hohe Fachkompetenz nötig; Ausfallfolgekosten schwer kalkulierbar; regelmäßige Überprüfungen aufwendig und teuer</td></tr></table>`],
+[3,"Einordnung der Strategien nach Verfügbarkeit und Kosten (A. T. Kearney)?",
+`<ul><li><b>Traditionell</b> (niedrige Verfügbarkeit): ausfallbasiert (korrektiv), zeitbasiert (präventiv)</li><li><b>Modern/innovativ</b> (hohe Verfügbarkeit): zustandsbasiert, vorausschauend, zuverlässigkeitsorientiert, risikoorientiert</li></ul><p>Höhere Verfügbarkeit geht tendenziell mit höheren IH-Kosten einher.</p>`],
+[3,"Grundsätze des Strategiemix?",
+`<ul><li>Jede Strategie hat ihre Daseinsberechtigung</li><li><b>Die neueste ist nicht die beste</b>, keine ist universell</li><li>Die richtige <b>Kombination</b> bringt die optimale Effizienz</li><li>Rein vorausschauende IH wäre zu kompliziert und unwirtschaftlich</li><li><b>Präventiver Aufwand muss geringer sein als die korrektiven Kosten</b></li></ul>`],
+[3,"Wo liegt das Kostenoptimum der Instandhaltung?",
+`<p><b>Gesamtkosten = präventive IH-Kosten + korrektive Kosten (Ausfall-/Folgekosten)</b></p><p>Mit mehr präventivem Aufwand steigen die präventiven Kosten, die Ausfallkosten sinken. Das <b>Minimum der Gesamtkostenkurve</b> ist die optimale IH-Strategie (zwischen reaktiv und rein präventiv, meist zustandsorientiert).</p>`],
+[3,"Strategiemix nach Kritikalität (Matyas): unkritisch / kritisch / höchstkritisch?",
+`<table><tr><th></th><th>Ziel-Zuverl.</th><th>ausfallb.</th><th>zeitb.</th><th>vorausschauend</th></tr>
+<tr><td>Unkritisch</td><td>80 %</td><td>85 %</td><td>10 %</td><td>5 %</td></tr>
+<tr><td>Kritisch</td><td>90 %</td><td>5 %</td><td>70 %</td><td>25 %</td></tr>
+<tr><td>Höchstkritisch</td><td>99,9 %</td><td>0 %</td><td>30 %</td><td>70 %</td></tr></table><p>z. B. Betrieb bis Ausfall → Inspektion mit intervallweisem Monitoring → kontinuierliches Monitoring</p>`],
+[3,"Welche Einflussgrößen bestimmen die Wahl der IH-Strategie?",
+`<ul><li><b>Technisch:</b> Ausfallwahrscheinlichkeit/-verhalten, Instandhaltbarkeit, Verschleißverhalten, Beanspruchung, Bauart</li><li><b>Produktionsrelevant:</b> Auslastung, Relevanz, Verkettung, Redundanz, Verfügbarkeit</li><li><b>Sicherheitstechnisch:</b> Anlagen-/Arbeitssicherheit, Gesundheits- und Umweltschutz</li><li><b>Wirtschaftlich:</b> Ausfall-, Ausfallfolge-, IH-Kosten</li><li><b>Rechtlich:</b> Gesetze, Richtlinien, Herstellervorgaben, Verordnungen</li></ul>`],
+[3,"Die fünf Ebenen der Instandhaltungsmaßnahmen (DIN 31051)?",
+`<ol><li><b>Einfache</b> Maßnahmen nach geringfügiger Schulung</li><li><b>Grundmaßnahmen</b> nach detaillierten Vorgehensweisen durch qualifiziertes Personal</li><li><b>Komplexe</b> Maßnahmen durch qualifiziertes technisches Personal</li><li>Maßnahmen mit Kenntnissen über eine <b>bestimmte Technik/Technologie</b> durch spezialisiertes Personal</li><li>Maßnahmen mit <b>Spezialwissen des Herstellers</b> oder eines Fachbetriebs (ggf. industrielles Unterstützungsgerät)</li></ol>`],
+[3,"Ordne Alltagsprodukte den Basisstrategien zu.",
+`<ul><li><b>Ausfallbasiert:</b> Glühbirne, Toaster, Fernbedienungsbatterie</li><li><b>Zeitbasiert:</b> Ölwechsel nach km/Jahr, Zahnbürste alle 3 Monate, Rauchmelderbatterie, Heizungswartung</li><li><b>Zustandsbasiert:</b> Reifen nach Profiltiefe, Bremsbeläge mit Verschleißanzeige, Tonerwechsel bei Warnung</li><li><b>Vorausschauend:</b> Auto-Servicebedarfsanzeige mit Restlaufzeit-Prognose, Smartphone-Akkuzustand</li></ul>`],
+];
+
+/* ---------- App ---------- */
+const $ = s => document.querySelector(s);
+const store = { get(k,d){ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):d }catch(e){ return d } }, set(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)) }catch(e){} } };
+const cards = C.map((c,i)=>({id:i,t:c[0],q:c[1],a:c[2]}));
+const perTopicIndex = {}; cards.forEach(c=>{ perTopicIndex[c.t]=(perTopicIndex[c.t]||0)+1; c.n=perTopicIndex[c.t]; });
+
+/* Lernstand je Karte: b = Stufe (0 = noch nicht gekonnt, 1–5 = gewusst), l = Zeitpunkt der letzten Antwort (0 = noch nie gesehen) */
+let S = store.get("wui-srs", null);
+if(!Array.isArray(S)){
+  S = cards.map(()=>({b:0,l:0}));
+  store.get("wui-known",[]).forEach(id=>{ if(S[id]) S[id].b=1; });   // alter Lernstand aus Version 1
+}
+while(S.length<cards.length) S.push({b:0,l:0});
+const save = ()=>store.set("wui-srs",S);
+const isKnown = c => S[c.id].b>=1;
+
+let topic = "all";
+let size = store.get("wui-size","10");
+let active = [], current = null, kind = "", lastId = -1, sinceReview = 0, reviewOnly = false, flipped = false;
+let streak = new Map(), wrongInSess = new Set();
+
+const inTopic = c => topic==="all" || String(c.t)===topic;
+const shuffle = a => { for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; };
+
+function fill(){
+  const cap = size==="all" ? Infinity : Number(size);
+  const pool = cards.filter(c=>inTopic(c) && !isKnown(c) && !active.includes(c))
+    .sort((a,b)=> (S[b.id].l>0) - (S[a.id].l>0) || a.id-b.id);   // angefangene Karten zuerst, dann in Vorlesungsreihenfolge
+  while(active.length<cap && pool.length) active.push(pool.shift());
+}
+function pickReview(){
+  let r = cards.filter(c=>inTopic(c) && isKnown(c) && !active.includes(c) && c.id!==lastId);
+  if(!r.length) return null;
+  const old = r.filter(c=>Date.now()-S[c.id].l > 3*60*1000);   // nicht direkt nach dem Lernen abfragen
+  if(old.length) r = old;
+  r.sort((a,b)=> S[a.id].b-S[b.id].b || S[a.id].l-S[b.id].l);  // niedrige Stufe und lange her zuerst
+  const top = r.slice(0, Math.min(5, r.length));
+  return top[Math.floor(Math.random()*top.length)];
+}
+function next(){
+  fill();
+  current = null;
+  if(reviewOnly || active.length===0){
+    if(reviewOnly){ const r=pickReview(); if(r){ current=r; kind="rev"; } }
+  } else {
+    const reviewDue = sinceReview>=3 && Math.random()<0.5;
+    if(reviewDue){ const r=pickReview(); if(r){ current=r; kind="rev"; sinceReview=0; } }
+    if(!current){
+      const opts = active.length>1 ? active.filter(c=>c.id!==lastId) : active;
+      current = opts[Math.floor(Math.random()*opts.length)];
+      kind = S[current.id].l>0 ? "learn" : "new";
+      sinceReview++;
+    }
+  }
+  render();
+}
+function newSession(){ active=[]; streak=new Map(); wrongInSess=new Set(); sinceReview=0; lastId=-1; reviewOnly=false; next(); }
+
+function render(){
+  const all = cards.filter(inTopic);
+  const k = all.filter(isKnown).length, sicher = all.filter(c=>S[c.id].b>=3).length;
+  const neu = all.filter(c=>!isKnown(c) && !active.includes(c)).length;
+  $("#known").textContent = `${k} / ${all.length} gewusst`;
+  $("#fill").style.width = (all.length ? k/all.length*100 : 0)+"%";
+  $("#count").textContent = reviewOnly ? `Wiederholen · ${sicher} sicher (Stufe 3+)` : `Im Stapel: ${active.length} · noch neu: ${neu}`;
+  const end = !current;
+  $("#stage").hidden = end; $("#ctrl").hidden = end; $("#done").hidden = !end;
+  if(end){
+    if(reviewOnly){ $("#doneTitle").textContent="Nichts zu wiederholen"; $("#doneTxt").textContent="In diesem Bereich hast du noch keine Karte gewusst."; $("#bReviewOnly").hidden=true; }
+    else { $("#doneTitle").textContent="Alles gelernt 🎉"; $("#doneTxt").textContent=`Du hast alle ${all.length} Karten in diesem Bereich mindestens einmal gewusst. Mit „Weiter wiederholen“ fragt dich der Stapel gemischt ab, schwache Karten zuerst.`; $("#bReviewOnly").hidden = k===0; }
+    return;
+  }
+  const c = current;
+  flipped=false; $("#card").classList.remove("flipped");
+  for(const id of ["#tagF","#tagB"]){ const el=$(id); el.className="tag t"+c.t; el.textContent=T[c.t]; }
+  const kt = {new:["Neu","k-new"], learn:["Üben","k-learn"], rev:["Wiederholung","k-rev"]}[kind];
+  for(const id of ["#kindF","#kindB"]){ const el=$(id); el.className="kind "+kt[1]; el.textContent=kt[0]; }
+  $("#numF").textContent = $("#numB").textContent = `Kap. ${c.t} · #${c.n}` + (S[c.id].b ? ` · Stufe ${S[c.id].b}` : "");
+  $("#q").innerHTML = c.q; $("#q2").innerHTML = c.q; $("#a").innerHTML = c.a;
+  $("#card").querySelector(".back").scrollTop = 0;
+}
+function flip(){ if(!current) return; flipped=!flipped; $("#card").classList.toggle("flipped",flipped); }
+function answer(ok){
+  const c = current; if(!c) return;
+  const st = S[c.id]; st.l = Date.now();
+  if(kind==="rev"){
+    if(ok) st.b = Math.min(5, st.b+1);
+    else { st.b = 0; if(!reviewOnly){ active.push(c); } wrongInSess.add(c.id); streak.set(c.id,0); }
+  } else {
+    if(ok){
+      const s = (streak.get(c.id)||0)+1; streak.set(c.id,s);
+      if(s >= (wrongInSess.has(c.id) ? 2 : 1)){ st.b = Math.max(1, st.b); active = active.filter(x=>x!==c); }
+    } else { streak.set(c.id,0); wrongInSess.add(c.id); st.b = 0; }
+  }
+  save(); lastId = c.id; next();
+  if(!$("#list").hidden) renderList();
+}
+
+$("#card").addEventListener("click", flip);
+$("#bOk").onclick = ()=>answer(true);
+$("#bNo").onclick = ()=>answer(false);
+$("#bReviewOnly").onclick = ()=>{ reviewOnly=true; next(); };
+function markSize(){ document.querySelectorAll("#sizes button").forEach(b=>b.setAttribute("aria-selected", b.dataset.size===String(size))); }
+document.querySelectorAll("#sizes button").forEach(b=>b.onclick=()=>{ size=b.dataset.size; store.set("wui-size",size); markSize(); newSession(); });
+$("#bReset").onclick = ()=>{ const b=$("#bReset"); if(b.dataset.c){ S=cards.map(()=>({b:0,l:0})); save(); b.textContent="Fortschritt zurücksetzen"; delete b.dataset.c; newSession(); renderList(); } else { b.dataset.c=1; b.textContent="Wirklich zurücksetzen? Nochmal klicken"; setTimeout(()=>{ if(b.dataset.c){ delete b.dataset.c; b.textContent="Fortschritt zurücksetzen"; } },3000); } };
+document.querySelectorAll(".chip").forEach(ch=>ch.onclick=()=>{
+  document.querySelectorAll(".chip").forEach(x=>x.setAttribute("aria-pressed","false"));
+  ch.setAttribute("aria-pressed","true"); topic=ch.dataset.topic; newSession(); renderList();
+});
+document.addEventListener("keydown", e=>{
+  if($("#learn").hidden || e.target.tagName==="INPUT" || e.target.tagName==="TEXTAREA") return;
+  if(e.key===" "||e.key==="Enter"){ if(e.target.tagName==="BUTTON"||e.target.tagName==="SUMMARY") return; e.preventDefault(); flip(); }
+  else if(e.key==="ArrowRight"){ answer(true); }
+  else if(e.key==="ArrowLeft"){ answer(false); }
+});
+
+/* Lernstand-Code: je zwei Karten-Stufen (0–5) in einem Zeichen zur Basis 36 */
+function makeCode(){
+  let out = "";
+  for(let i=0;i<cards.length;i+=2){ const a=S[i].b, b=(i+1<cards.length?S[i+1].b:0); out += (a*6+b).toString(36); }
+  return "WUI2-" + cards.length + "-" + out.toUpperCase();
+}
+function readCode(s){
+  s = s.trim().toUpperCase().replace(/\s+/g,"");
+  let m = s.match(/^WUI2-(\d+)-([0-9A-Z]+)$/);
+  if(m){
+    const lv = [];
+    for(const ch of m[2]){ const v=parseInt(ch,36); lv.push(Math.floor(v/6), v%6); }
+    return lv.slice(0, cards.length);
+  }
+  m = s.match(/^WUI-(\d+)-([0-9A-F]+)$/);   // Code aus Version 1 (nur gewusst ja/nein)
+  if(m){
+    const lv = cards.map(()=>0);
+    for(let i=0;i<m[2].length;i++){ const v=parseInt(m[2][i],16); for(let b=0;b<4;b++) if(v&(1<<b)){ const id=i*4+b; if(id<cards.length) lv[id]=1; } }
+    return lv;
+  }
+  return null;
+}
+const msg = t => { $("#saveMsg").textContent = t; };
+$("#bSave").onclick = ()=>{ const box=$("#savebox"); box.hidden=!box.hidden; if(!box.hidden){ $("#code").value=makeCode(); msg(`Stand von jetzt: ${cards.filter(isKnown).length} Karten gewusst.`); } };
+$("#bCopy").onclick = async ()=>{
+  const code = makeCode(); $("#code").value = code;
+  try{ await navigator.clipboard.writeText(code); msg("Kopiert ✓"); }
+  catch(e){ $("#code").select(); try{ document.execCommand("copy"); msg("Kopiert ✓"); }catch(_){ msg("Bitte den Code markieren und manuell kopieren."); } }
+};
+$("#bLoad").onclick = ()=>{
+  const lv = readCode($("#code").value);
+  if(!lv){ msg("Dieser Code ist ungültig. Er muss mit „WUI2-“ oder „WUI-“ beginnen."); return; }
+  const now = Date.now();
+  S = cards.map((c,i)=>({b: Math.min(5, lv[i]||0), l: (lv[i]||0) ? now-24*3600*1000 : 0}));
+  save(); newSession(); renderList();
+  $("#code").value = makeCode(); msg(`Geladen ✓: ${cards.filter(isKnown).length} Karten als gewusst übernommen.`);
+};
+
+/* Liste */
+function strip(h){ const d=document.createElement("div"); d.innerHTML=h; return d.textContent.toLowerCase(); }
+cards.forEach(c=>c.s = strip(c.q+" "+c.a));
+function renderList(){
+  const q = $("#search").value.trim().toLowerCase();
+  let html="";
+  for(const t of [1,2,3]){
+    if(topic!=="all" && String(t)!==topic) continue;
+    const list = cards.filter(c=>c.t===t && (!q || c.s.includes(q)));
+    if(!list.length) continue;
+    html += `<h2 class="sec">${t} · ${T[t]} <span style="color:var(--muted);font-size:.85rem;font-family:Inter">(${list.length})</span></h2>`;
+    for(const c of list){ const b=S[c.id].b; html += `<div class="item${b?" known":""}">${b?`<span class="st">✓ Stufe ${b}</span>`:''}<div class="iq"><span class="num">#${c.n}</span>${c.q}</div><div class="a">${c.a}</div></div>`; }
+  }
+  $("#items").innerHTML = html || `<p style="color:var(--muted)">Keine Karte gefunden.</p>`;
+}
+$("#search").addEventListener("input", renderList);
+function setTab(list){
+  $("#tabLearn").setAttribute("aria-selected", !list); $("#tabList").setAttribute("aria-selected", list);
+  $("#learn").hidden = list; $("#list").hidden = !list; if(list) renderList();
+}
+$("#tabLearn").onclick=()=>setTab(false); $("#tabList").onclick=()=>setTab(true);
+markSize();
+newSession();
+</script>
+</body>
+</html>
